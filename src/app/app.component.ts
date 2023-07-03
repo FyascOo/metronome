@@ -3,9 +3,9 @@ import { RouterModule } from '@angular/router';
 
 @Component({
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, MatButtonModule],
   selector: 'metronome-root',
-  template: `Hello`,
+  template: `<button mat-button>Basic</button>`,
 })
 export class AppComponent {
   title = 'metronome';
