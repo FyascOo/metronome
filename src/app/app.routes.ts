@@ -4,7 +4,7 @@ export const appRoutes: Route[] = [
   {
     path: '',
     loadComponent: () =>
-      import('./metronome/ui/metronome-page/metronome-page.component').then(
+      import('./metronome-page/metronome-page.component').then(
         (m) => m.MetronomePageComponent
       ),
   },

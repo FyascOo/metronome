@@ -22,8 +22,8 @@ import { Observable } from 'rxjs';
 export class MesureComponent {
   @Output() emitMesure: Observable<number>;
   mesures = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
-  mesureFC = new FormControl(4);
+  mesureFC = new FormControl(4, { nonNullable: true });
   constructor() {
-    this.emitMesure = this.mesureFC.valueChanges as Observable<number>;
+    this.emitMesure = this.mesureFC.valueChanges;
   }
 }

@@ -39,7 +39,7 @@ import { BehaviorSubject, delay, of, take } from 'rxjs';
         fill="url(#paint1_radial)"
       />
       <rect
-        *ngFor="let nb of [0, 0, 0, 0]"
+        *ngFor="let nb of mesures"
         #mesure
         id="mesure"
         x="101"
@@ -113,7 +113,7 @@ import { BehaviorSubject, delay, of, take } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MetronomeComponent {
-  @Input() start!: boolean;
+  @Input() start = false;
   @Input() bpm: number | null = null;
   @Input() mesure: number | null = null;
   @Input() isBeeping: number | null = null;

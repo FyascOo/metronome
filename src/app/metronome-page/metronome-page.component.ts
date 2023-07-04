@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Howl } from 'howler';
 import { BehaviorSubject, Subject, combineLatest } from 'rxjs';
-import { MetronomeComponent } from '..//metronome/metronome.component';
 import { BpmComponent } from '../bpm/bpm.component';
 import { MesureComponent } from '../mesure/mesure.component';
+import { MetronomeComponent } from '../metronome/metronome.component';
 import { StartComponent } from '../start/start.component';
 
 @Component({
