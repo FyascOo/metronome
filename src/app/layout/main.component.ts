@@ -6,6 +6,16 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   template: `<ng-content></ng-content>`,
+  styles: [
+    `
+      :host {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent {}

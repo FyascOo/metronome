@@ -6,7 +6,15 @@ import { MainComponent } from './layout/main.component';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'metronome-root',
-  template: `<metronome-main></metronome-main>`,
+  template: `<metronome-main><router-outlet></router-outlet></metronome-main>`,
+  styles: [
+    `
+      :host {
+        flex: 1;
+        display: flex;
+      }
+    `,
+  ],
   imports: [RouterModule, MainComponent],
 })
 export class AppComponent {}
