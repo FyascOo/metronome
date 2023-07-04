@@ -20,6 +20,7 @@
     "@angular/platform-browser-dynamic": "~16.1.0",
     "@angular/router": "~16.1.0",
     "@nx/angular": "16.4.2",
+    "howler": "^2.2.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.13.0"
@@ -42,6 +43,7 @@
     "@nx/web": "16.4.2",
     "@nx/workspace": "16.4.2",
     "@schematics/angular": "~16.1.0",
+    "@types/howler": "^2.2.7",
     "@types/jest": "^29.4.0",
     "@types/node": "16.11.7",
     "@typescript-eslint/eslint-plugin": "^5.58.0",
