@@ -1,13 +1,12 @@
-import { Component } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { MainComponent } from './layout/main.component';
 
 @Component({
   standalone: true,
-  imports: [RouterModule, MatButtonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'metronome-root',
-  template: `<button mat-raised-button color="primary">Basic</button>`,
+  template: `<metronome-main></metronome-main>`,
+  imports: [RouterModule, MainComponent],
 })
-export class AppComponent {
-  title = 'metronome';
-}
+export class AppComponent {}
