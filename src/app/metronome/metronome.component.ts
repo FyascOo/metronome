@@ -4,13 +4,11 @@ import {
   Component,
   ElementRef,
   Input,
-  Output,
   QueryList,
-  SimpleChanges,
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { BehaviorSubject, delay, of, take } from 'rxjs';
+import { delay, of, take } from 'rxjs';
 
 @Component({
   selector: 'metronome-metronome',
@@ -113,101 +111,33 @@ import { BehaviorSubject, delay, of, take } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MetronomeComponent {
-  @Input() start = false;
-  @Input() bpm: number | null = null;
-  @Input() mesure: number | null = null;
-  @Input() isBeeping: number | null = null;
-  @Output() emitNbRotate = new BehaviorSubject<number>(0);
   @ViewChild('pointer') pointer!: ElementRef;
-  @ViewChildren('mesure') barMesures!: QueryList<ElementRef>;
-  nbRotate = 0;
-  rotate = 0;
-  mesures!: number[];
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['isBeeping']) {
-      if (this.barMesures) {
-        this._toBlink();
-      }
-    }
-    if (changes['start'] || changes['mesure']) {
-      this._initiateLoop();
-      if (this.mesure) {
-        this.mesures = Array(this.mesure);
-      }
-    }
-  }
-
-  ngAfterViewInit() {
-    this._initMesure();
-    this._setMesure();
-  }
-
-  rotation() {
-    this.nbRotate++;
-    this.rotate = this.nbRotate * this._bpmPerCycle();
-    this.emitNbRotate.next(this.nbRotate);
-    this._refreshValue();
-    this._affectStyle();
-    this._loop();
-  }
-
-  private _initMesure() {
-    this.barMesures.forEach((v, i) => {
-      if (i !== 0) {
-        const deg = (360 / this.barMesures.length) * i;
-        v.nativeElement.style.transformOrigin = 'center';
-        v.nativeElement.style.transform = `rotateZ(${deg}deg)`;
-      }
+  @ViewChildren('mesure') set barMesures(barMesures: QueryList<ElementRef>) {
+    barMesures.forEach((barMesure, i) => {
+      const deg = (360 / this.mesures.length) * i;
+      console.log(deg);
+      barMesure.nativeElement.style.transformOrigin = 'center';
+      barMesure.nativeElement.style.transform = `rotateZ(${deg}deg)`;
     });
   }
 
-  private _setMesure() {
-    this.barMesures.changes.subscribe((bar) => {
-      bar.forEach((v: any, i: number) => {
-        if (i !== 0) {
-          const deg = (360 / this.barMesures.length) * i;
-          v.nativeElement.style.transformOrigin = 'center';
-          v.nativeElement.style.transform = `rotateZ(${deg}deg)`;
-        }
-      });
-    });
+  @Input() set mesure(value: number) {
+    this.mesures = [...Array(value).keys()];
   }
 
-  private _initiateLoop() {
-    if (this.start) {
-      window.requestAnimationFrame(() => this.rotation());
-    }
-  }
-
-  private _refreshValue() {
-    if (this.rotate > 360) {
-      this.nbRotate = 0;
-      this.rotate = 0;
-    }
-  }
-  private _loop() {
-    if (this.start) {
-      requestAnimationFrame(() => this.rotation());
-    }
-  }
-  private _affectStyle() {
+  @Input() set rotate(value: number) {
     this.pointer.nativeElement.style.transformOrigin = 'center';
-    this.pointer.nativeElement.style.transform = `rotateZ(${this.rotate}deg)`;
+    this.pointer.nativeElement.style.transform = `rotateZ(${value}deg)`;
   }
 
-  private _bpmPerCycle() {
-    return this.bpm! / 10 / this.mesure!;
-  }
-
-  private _toBlink() {
-    this.barMesures.get(this.isBeeping!)!.nativeElement.style.fill = 'red';
+  @Input() set barMesureBlink(value: number) {
+    this.barMesures.get(value)!.nativeElement.style.fill = 'red';
     of(1)
       .pipe(take(1), delay(300))
       .subscribe(
-        () =>
-          (this.barMesures.get(this.isBeeping!)!.nativeElement.style.fill =
-            'black')
+        () => (this.barMesures.get(value)!.nativeElement.style.fill = 'black')
       );
   }
+
+  mesures!: number[];
 }

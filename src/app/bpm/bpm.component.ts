@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Output } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatSliderModule } from '@angular/material/slider';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'metronome-bpm',

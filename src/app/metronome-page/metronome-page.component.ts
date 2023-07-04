@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { Howl } from 'howler';
 import { BehaviorSubject, Subject, combineLatest } from 'rxjs';
 import { BpmComponent } from '../bpm/bpm.component';
@@ -12,18 +12,11 @@ import { StartComponent } from '../start/start.component';
   standalone: true,
   template: `
     <metronome-start
-      [start]="start"
-      (eventStart)="start = !start"
+      (eventStart)="$event ? initLoop() : stopLoop()"
     ></metronome-start>
     <metronome-bpm (emitBPM)="bpm$.next($event)"></metronome-bpm>
     <metronome-mesure (emitMesure)="mesure$.next($event)"></metronome-mesure
-    ><metronome-metronome
-      [start]="start"
-      [bpm]="bpm$ | async"
-      [mesure]="mesure$ | async"
-      (emitNbRotate)="nbRotate$.next($event)"
-      [isBeeping]="emitBeep$ | async"
-    ></metronome-metronome>
+    ><metronome-metronome [mesure]="(mesure$ | async)!"></metronome-metronome>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,7 +29,7 @@ import { StartComponent } from '../start/start.component';
   ],
 })
 export class MetronomePageComponent {
-  start = false;
+  start = signal(false);
   bpm$ = new BehaviorSubject(60);
   nbRotate$ = new Subject<number>();
   mesure$ = new BehaviorSubject<number>(4);
@@ -45,24 +38,8 @@ export class MetronomePageComponent {
     src: ['../assets/son/bip.flac'],
   });
 
-  constructor() {
-    combineLatest([this.nbRotate$, this.mesure$, this.bpm$]).subscribe(
-      ([nbRotate, mesure, bpm]) => {
-        const tempo = Array(mesure)
-          .fill(0)
-          .map((v, i) => {
-            const speed = (i + 1) * ((60 / bpm) * 60);
-            return Math.round(speed);
-          });
-        if (tempo.includes(nbRotate)) {
-          this._playBip();
-          const nbMesure = nbRotate / bpm === 4 ? 0 : nbRotate / bpm;
-          this.emitBeep$.next(nbMesure);
-        }
-      }
-    );
-  }
-
+  initLoop() {}
+  stopLoop() {}
   private _playBip() {
     this.beep.play();
   }
