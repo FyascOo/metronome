@@ -8,7 +8,7 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { delay, of, take } from 'rxjs';
+import { BehaviorSubject, delay, of, take } from 'rxjs';
 
 @Component({
   selector: 'metronome-metronome',
@@ -111,23 +111,28 @@ import { delay, of, take } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MetronomeComponent {
-  @ViewChild('pointer') pointer!: ElementRef;
+  @ViewChild('pointer') set pointer(pointer: ElementRef) {
+    this.degree$.subscribe((degree) => {
+      pointer.nativeElement.style.transformOrigin = 'center';
+      pointer.nativeElement.style.transform = `rotateZ(${degree}deg)`;
+    });
+  }
   @ViewChildren('mesure') set barMesures(barMesures: QueryList<ElementRef>) {
     barMesures.forEach((barMesure, i) => {
-      const deg = (360 / this.mesures.length) * i;
-      console.log(deg);
+      const degree = (360 / this.mesures.length) * i;
       barMesure.nativeElement.style.transformOrigin = 'center';
-      barMesure.nativeElement.style.transform = `rotateZ(${deg}deg)`;
+      barMesure.nativeElement.style.transform = `rotateZ(${degree}deg)`;
     });
   }
 
-  @Input() set mesure(value: number) {
-    this.mesures = [...Array(value).keys()];
+  @Input() set mesure(mesure: number) {
+    this.mesures = [...Array(mesure).keys()];
   }
 
-  @Input() set rotate(value: number) {
-    this.pointer.nativeElement.style.transformOrigin = 'center';
-    this.pointer.nativeElement.style.transform = `rotateZ(${value}deg)`;
+  @Input() set degree(degree: number | null) {
+    if (degree) {
+      this.degree$.next(degree);
+    }
   }
 
   @Input() set barMesureBlink(value: number) {
@@ -140,4 +145,5 @@ export class MetronomeComponent {
   }
 
   mesures!: number[];
+  degree$ = new BehaviorSubject<number>(0);
 }
