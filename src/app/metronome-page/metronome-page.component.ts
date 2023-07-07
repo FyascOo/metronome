@@ -53,9 +53,12 @@ export class MetronomePageComponent {
       .pipe(takeUntil(this.stopLoop$))
       .subscribe(([bpm, mesure, interval]) => {
         const degree = ((interval * 20 * (bpm / 60)) / 1000) * (360 / mesure);
-        console.log(degree);
+        const inter =
+          ((360 / mesure) * Math.round((interval * 20 * (bpm / 60)) / 1000)) /
+          (360 / mesure);
+        console.log(inter);
         this.degree$.next(degree);
-        if (degree === (90 || 180 || 270)) {
+        if (degree === inter) {
           this.beep.play();
         }
       });
