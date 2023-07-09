@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   Input,
+  Output,
   QueryList,
   ViewChild,
   ViewChildren,
@@ -20,6 +21,7 @@ import { BehaviorSubject, Subject, delay, tap } from 'rxjs';
     viewBox="0 0 200 200"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    (click)="startEvent.next(!startEvent.value)"
   >
     <g id="metronome">
       <rect width="200" height="200" fill="white" />
@@ -151,6 +153,8 @@ export class MetronomeComponent {
       this.blink$.next(blink);
     }
   }
+
+  @Output() startEvent = new BehaviorSubject(false);
 
   mesures!: number[];
   degree$ = new BehaviorSubject<number>(0);

@@ -14,15 +14,11 @@ import {
 import { BpmComponent } from '../bpm/bpm.component';
 import { MesureComponent } from '../mesure/mesure.component';
 import { MetronomeComponent } from '../metronome/metronome.component';
-import { StartComponent } from '../start/start.component';
 
 @Component({
   selector: 'metronome-metronome-page',
   standalone: true,
   template: `
-    <metronome-start
-      (eventStart)="$event ? initLoop() : stopLoop()"
-    ></metronome-start>
     <metronome-bpm
       [start]="start()"
       (emitBPM)="bpm$.next($event)"
@@ -35,17 +31,12 @@ import { StartComponent } from '../start/start.component';
       [mesure]="(mesure$ | async)!"
       [degree]="degree$ | async"
       [blink]="blink$ | async"
+      (startEvent)="$event ? initLoop() : stopLoop()"
     ></metronome-metronome>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    MetronomeComponent,
-    StartComponent,
-    BpmComponent,
-    MesureComponent,
-  ],
+  imports: [CommonModule, MetronomeComponent, BpmComponent, MesureComponent],
 })
 export class MetronomePageComponent {
   start = signal(false);
