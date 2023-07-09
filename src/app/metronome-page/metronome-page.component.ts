@@ -6,6 +6,7 @@ import {
   Subject,
   combineLatest,
   interval,
+  map,
   switchMap,
   takeUntil,
   tap,
@@ -27,6 +28,7 @@ import { StartComponent } from '../start/start.component';
     ><metronome-metronome
       [mesure]="(mesure$ | async)!"
       [degree]="degree$ | async"
+      [blink]="blink$ | async"
     ></metronome-metronome>
   `,
   styles: [],
@@ -42,30 +44,39 @@ import { StartComponent } from '../start/start.component';
 export class MetronomePageComponent {
   start = signal(false);
   bpm$ = new BehaviorSubject(60);
-  degree$ = new Subject<number>();
   mesure$ = new BehaviorSubject<number>(4);
+  degree$ = new Subject<number>();
   emitBeep$ = new Subject<number>();
+  stopLoop$ = new Subject();
+  blink$ = new Subject<number>();
   beep = new Howl({
     src: ['../assets/son/bip.flac'],
   });
-  stopLoop$ = new Subject();
 
   initLoop() {
     combineLatest([this.bpm$, this.mesure$, interval(20)])
       .pipe(takeUntil(this.stopLoop$.pipe(tap(() => this.degree$.next(0)))))
-      .subscribe(([bpm, mesure, interval]) => {
-        // nombre d'interval * 20ms * bpm ramené à des secondes / 1000 pour ramené à des secondes * le nombre de degree par mesure
-        const degree = ((interval * 20 * (bpm / 60)) / 1000) * (360 / mesure);
-        this.degree$.next(degree);
-      });
-    this.bpm$
+      .subscribe(([bpm, mesure, interval]) =>
+        this.degree$.next(
+          ((interval * 20 * (bpm / 60)) / 1000) * (360 / mesure)
+        )
+      );
+
+    combineLatest([this.bpm$, this.mesure$])
       .pipe(
         tap(() => this.beep.play()),
-        switchMap((bpm) =>
-          interval((1000 * 60) / bpm).pipe(takeUntil(this.stopLoop$))
+        tap(() => this.blink$.next(0)),
+        switchMap(([bpm, mesure]) =>
+          interval((1000 * 60) / bpm).pipe(
+            map((interval) => ({ interval, mesure })),
+            takeUntil(this.stopLoop$)
+          )
         ),
         takeUntil(this.stopLoop$)
       )
-      .subscribe(() => this.beep.play());
+      .subscribe(({ interval, mesure }) => {
+        this.beep.play();
+        this.blink$.next((interval + 1) % mesure);
+      });
   }
 }

@@ -8,7 +8,7 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { BehaviorSubject, delay, of, take } from 'rxjs';
+import { BehaviorSubject, Subject, delay, tap } from 'rxjs';
 
 @Component({
   selector: 'metronome-metronome',
@@ -123,6 +123,17 @@ export class MetronomeComponent {
       barMesure.nativeElement.style.transformOrigin = 'center';
       barMesure.nativeElement.style.transform = `rotateZ(${degree}deg)`;
     });
+
+    this.blink$
+      .pipe(
+        tap(
+          (blink) => (barMesures.get(blink)!.nativeElement.style.fill = 'red')
+        ),
+        delay(200)
+      )
+      .subscribe(
+        (blink) => (barMesures.get(blink)!.nativeElement.style.fill = 'black')
+      );
   }
 
   @Input() set mesure(mesure: number) {
@@ -135,15 +146,13 @@ export class MetronomeComponent {
     }
   }
 
-  @Input() set barMesureBlink(value: number) {
-    this.barMesures.get(value)!.nativeElement.style.fill = 'red';
-    of(1)
-      .pipe(take(1), delay(300))
-      .subscribe(
-        () => (this.barMesures.get(value)!.nativeElement.style.fill = 'black')
-      );
+  @Input() set blink(blink: number | null) {
+    if (blink !== null) {
+      this.blink$.next(blink);
+    }
   }
 
   mesures!: number[];
   degree$ = new BehaviorSubject<number>(0);
+  blink$ = new Subject<number>();
 }
