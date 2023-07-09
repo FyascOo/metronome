@@ -13,15 +13,27 @@ import { Observable } from 'rxjs';
   selector: 'metronome-mesure',
   standalone: true,
   imports: [CommonModule, MatSelectModule, ReactiveFormsModule],
-  template: `<mat-form-field>
-    <mat-label>Toppings</mat-label>
+  template: `<mat-form-field class="margin">
+    <mat-label>Mesure</mat-label>
     <mat-select [formControl]="mesureFC">
       <mat-option *ngFor="let mesure of mesures" [value]="mesure">{{
         mesure
       }}</mat-option>
     </mat-select>
   </mat-form-field>`,
-  styles: [],
+  styles: [
+    `
+      :host {
+        width: 100%;
+        display: flex;
+        justify-content: end;
+      }
+
+      .margin {
+        margin-right: 40px;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MesureComponent {

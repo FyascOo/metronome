@@ -19,10 +19,6 @@ import { MetronomeComponent } from '../metronome/metronome.component';
   selector: 'metronome-metronome-page',
   standalone: true,
   template: `
-    <metronome-bpm
-      [start]="start()"
-      (emitBPM)="bpm$.next($event)"
-    ></metronome-bpm>
     <metronome-mesure
       [start]="start()"
       (emitMesure)="mesure$.next($event)"
@@ -33,8 +29,23 @@ import { MetronomeComponent } from '../metronome/metronome.component';
       [blink]="blink$ | async"
       (startEvent)="$event ? initLoop() : stopLoop()"
     ></metronome-metronome>
+    <metronome-bpm
+      [start]="start()"
+      (emitBPM)="bpm$.next($event)"
+    ></metronome-bpm>
   `,
-  styles: [],
+  styles: [
+    `
+      :host {
+        height: 100%;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MetronomeComponent, BpmComponent, MesureComponent],
 })

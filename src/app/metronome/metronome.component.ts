@@ -114,6 +114,7 @@ import { BehaviorSubject, Subject, delay, tap } from 'rxjs';
 })
 export class MetronomeComponent {
   @ViewChild('pointer') set pointer(pointer: ElementRef) {
+    pointer.nativeElement.style.transform = `translateY(1550)`;
     this.degree$.subscribe((degree) => {
       pointer.nativeElement.style.transformOrigin = 'center';
       pointer.nativeElement.style.transform = `rotateZ(${degree}deg)`;
