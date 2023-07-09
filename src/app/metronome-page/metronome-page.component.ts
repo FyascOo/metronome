@@ -21,10 +21,16 @@ import { StartComponent } from '../start/start.component';
   standalone: true,
   template: `
     <metronome-start
-      (eventStart)="$event ? initLoop() : stopLoop$.next(0)"
+      (eventStart)="$event ? initLoop() : stopLoop()"
     ></metronome-start>
-    <metronome-bpm (emitBPM)="bpm$.next($event)"></metronome-bpm>
-    <metronome-mesure (emitMesure)="mesure$.next($event)"></metronome-mesure
+    <metronome-bpm
+      [start]="start()"
+      (emitBPM)="bpm$.next($event)"
+    ></metronome-bpm>
+    <metronome-mesure
+      [start]="start()"
+      (emitMesure)="mesure$.next($event)"
+    ></metronome-mesure
     ><metronome-metronome
       [mesure]="(mesure$ | async)!"
       [degree]="degree$ | async"
@@ -54,6 +60,7 @@ export class MetronomePageComponent {
   });
 
   initLoop() {
+    this.start.set(true);
     combineLatest([this.bpm$, this.mesure$, interval(20)])
       .pipe(takeUntil(this.stopLoop$.pipe(tap(() => this.degree$.next(0)))))
       .subscribe(([bpm, mesure, interval]) =>
@@ -78,5 +85,10 @@ export class MetronomePageComponent {
         this.beep.play();
         this.blink$.next((interval + 1) % mesure);
       });
+  }
+
+  stopLoop() {
+    this.start.set(false);
+    this.stopLoop$.next(0);
   }
 }

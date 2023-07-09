@@ -1,7 +1,12 @@
-import { ChangeDetectionStrategy, Component, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatSelectModule } from '@angular/material/select';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  Output,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -20,6 +25,13 @@ import { Observable } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MesureComponent {
+  @Input() set start(start: boolean) {
+    if (start) {
+      this.mesureFC.disable();
+    } else {
+      this.mesureFC.enable();
+    }
+  }
   @Output() emitMesure: Observable<number>;
   mesures = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
   mesureFC = new FormControl(4, { nonNullable: true });

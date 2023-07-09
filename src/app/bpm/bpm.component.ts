@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  Output,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatSliderModule } from '@angular/material/slider';
 import { Observable } from 'rxjs';
@@ -15,6 +20,13 @@ import { Observable } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BpmComponent {
+  @Input() set start(start: boolean) {
+    if (start) {
+      this.bpmFC.disable();
+    } else {
+      this.bpmFC.enable();
+    }
+  }
   @Output() emitBPM: Observable<number>;
   bpmFC = new FormControl(60, { nonNullable: true });
   constructor() {
