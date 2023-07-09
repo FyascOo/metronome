@@ -130,7 +130,7 @@ export class MetronomeComponent {
   }
 
   @Input() set degree(degree: number | null) {
-    if (degree) {
+    if (degree !== null) {
       this.degree$.next(degree);
     }
   }

@@ -6,7 +6,9 @@ import {
   Subject,
   combineLatest,
   interval,
+  switchMap,
   takeUntil,
+  tap,
 } from 'rxjs';
 import { BpmComponent } from '../bpm/bpm.component';
 import { MesureComponent } from '../mesure/mesure.component';
@@ -50,17 +52,20 @@ export class MetronomePageComponent {
 
   initLoop() {
     combineLatest([this.bpm$, this.mesure$, interval(20)])
-      .pipe(takeUntil(this.stopLoop$))
+      .pipe(takeUntil(this.stopLoop$.pipe(tap(() => this.degree$.next(0)))))
       .subscribe(([bpm, mesure, interval]) => {
+        // nombre d'interval * 20ms * bpm ramené à des secondes / 1000 pour ramené à des secondes * le nombre de degree par mesure
         const degree = ((interval * 20 * (bpm / 60)) / 1000) * (360 / mesure);
-        const inter =
-          ((360 / mesure) * Math.round((interval * 20 * (bpm / 60)) / 1000)) /
-          (360 / mesure);
-        console.log(inter);
         this.degree$.next(degree);
-        if (degree === inter) {
-          this.beep.play();
-        }
       });
+    this.bpm$
+      .pipe(
+        tap(() => this.beep.play()),
+        switchMap((bpm) =>
+          interval((1000 * 60) / bpm).pipe(takeUntil(this.stopLoop$))
+        ),
+        takeUntil(this.stopLoop$)
+      )
+      .subscribe(() => this.beep.play());
   }
 }
