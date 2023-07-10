@@ -4,6 +4,7 @@ import {
   Component,
   Input,
   Output,
+  signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,13 +23,23 @@ import { Observable } from 'rxjs';
     MatButtonModule,
   ],
   template: `
-    <button class="flex-1" mat-icon-button (click)="update(-1)">
+    <button
+      class="flex-1"
+      mat-icon-button
+      [disabled]="isStart()"
+      (click)="update(-1)"
+    >
       <mat-icon color="primary" fontIcon="remove"></mat-icon>
     </button>
     <mat-slider discrete min="0" max="260" class="flex-2"
       ><input matSliderThumb [formControl]="bpmFC"
     /></mat-slider>
-    <button class="flex-1" mat-icon-button (click)="update(1)">
+    <button
+      class="flex-1"
+      mat-icon-button
+      [disabled]="isStart()"
+      (click)="update(1)"
+    >
       <mat-icon color="primary" fontIcon="add"></mat-icon>
     </button>
   `,
@@ -54,12 +65,16 @@ export class BpmComponent {
   @Input() set start(start: boolean) {
     if (start) {
       this.bpmFC.disable();
+      this.isStart.set(true);
     } else {
       this.bpmFC.enable();
+      this.isStart.set(false);
     }
   }
   @Output() emitBPM: Observable<number>;
   bpmFC = new FormControl(60, { nonNullable: true });
+
+  isStart = signal(false);
   constructor() {
     this.emitBPM = this.bpmFC.valueChanges;
   }
