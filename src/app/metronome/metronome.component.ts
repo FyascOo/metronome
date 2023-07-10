@@ -6,11 +6,10 @@ import {
   Input,
   Output,
   QueryList,
-  SimpleChanges,
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { BehaviorSubject, delay, of, take } from 'rxjs';
+import { BehaviorSubject, Subject, delay, tap } from 'rxjs';
 
 @Component({
   selector: 'metronome-metronome',
@@ -22,6 +21,7 @@ import { BehaviorSubject, delay, of, take } from 'rxjs';
     viewBox="0 0 200 200"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    (click)="startEvent.next(!startEvent.value)"
   >
     <g id="metronome">
       <rect width="200" height="200" fill="white" />
@@ -39,7 +39,7 @@ import { BehaviorSubject, delay, of, take } from 'rxjs';
         fill="url(#paint1_radial)"
       />
       <rect
-        *ngFor="let nb of [0, 0, 0, 0]"
+        *ngFor="let nb of mesures"
         #mesure
         id="mesure"
         x="101"
@@ -113,101 +113,51 @@ import { BehaviorSubject, delay, of, take } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MetronomeComponent {
-  @Input() start!: boolean;
-  @Input() bpm: number | null = null;
-  @Input() mesure: number | null = null;
-  @Input() isBeeping: number | null = null;
-  @Output() emitNbRotate = new BehaviorSubject<number>(0);
-  @ViewChild('pointer') pointer!: ElementRef;
-  @ViewChildren('mesure') barMesures!: QueryList<ElementRef>;
-  nbRotate = 0;
-  rotate = 0;
-  mesures!: number[];
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['isBeeping']) {
-      if (this.barMesures) {
-        this._toBlink();
-      }
-    }
-    if (changes['start'] || changes['mesure']) {
-      this._initiateLoop();
-      if (this.mesure) {
-        this.mesures = Array(this.mesure);
-      }
-    }
-  }
-
-  ngAfterViewInit() {
-    this._initMesure();
-    this._setMesure();
-  }
-
-  rotation() {
-    this.nbRotate++;
-    this.rotate = this.nbRotate * this._bpmPerCycle();
-    this.emitNbRotate.next(this.nbRotate);
-    this._refreshValue();
-    this._affectStyle();
-    this._loop();
-  }
-
-  private _initMesure() {
-    this.barMesures.forEach((v, i) => {
-      if (i !== 0) {
-        const deg = (360 / this.barMesures.length) * i;
-        v.nativeElement.style.transformOrigin = 'center';
-        v.nativeElement.style.transform = `rotateZ(${deg}deg)`;
-      }
+  @ViewChild('pointer') set pointer(pointer: ElementRef) {
+    pointer.nativeElement.style.transform = `translateY(1550)`;
+    this.degree$.subscribe((degree) => {
+      pointer.nativeElement.style.transformOrigin = 'center';
+      pointer.nativeElement.style.transform = `rotateZ(${degree}deg)`;
     });
   }
-
-  private _setMesure() {
-    this.barMesures.changes.subscribe((bar) => {
-      bar.forEach((v: any, i: number) => {
-        if (i !== 0) {
-          const deg = (360 / this.barMesures.length) * i;
-          v.nativeElement.style.transformOrigin = 'center';
-          v.nativeElement.style.transform = `rotateZ(${deg}deg)`;
-        }
-      });
+  @ViewChildren('mesure') set barMesures(barMesures: QueryList<ElementRef>) {
+    barMesures.forEach((barMesure, i) => {
+      const degree = (360 / this.mesures.length) * i;
+      barMesure.nativeElement.style.transformOrigin = 'center';
+      barMesure.nativeElement.style.transform = `rotateZ(${degree}deg)`;
     });
-  }
 
-  private _initiateLoop() {
-    if (this.start) {
-      window.requestAnimationFrame(() => this.rotation());
-    }
-  }
-
-  private _refreshValue() {
-    if (this.rotate > 360) {
-      this.nbRotate = 0;
-      this.rotate = 0;
-    }
-  }
-  private _loop() {
-    if (this.start) {
-      requestAnimationFrame(() => this.rotation());
-    }
-  }
-  private _affectStyle() {
-    this.pointer.nativeElement.style.transformOrigin = 'center';
-    this.pointer.nativeElement.style.transform = `rotateZ(${this.rotate}deg)`;
-  }
-
-  private _bpmPerCycle() {
-    return this.bpm! / 10 / this.mesure!;
-  }
-
-  private _toBlink() {
-    this.barMesures.get(this.isBeeping!)!.nativeElement.style.fill = 'red';
-    of(1)
-      .pipe(take(1), delay(300))
+    this.blink$
+      .pipe(
+        tap(
+          (blink) => (barMesures.get(blink)!.nativeElement.style.fill = 'red')
+        ),
+        delay(200)
+      )
       .subscribe(
-        () =>
-          (this.barMesures.get(this.isBeeping!)!.nativeElement.style.fill =
-            'black')
+        (blink) => (barMesures.get(blink)!.nativeElement.style.fill = 'black')
       );
   }
+
+  @Input() set mesure(mesure: number) {
+    this.mesures = [...Array(mesure).keys()];
+  }
+
+  @Input() set degree(degree: number | null) {
+    if (degree !== null) {
+      this.degree$.next(degree);
+    }
+  }
+
+  @Input() set blink(blink: number | null) {
+    if (blink !== null) {
+      this.blink$.next(blink);
+    }
+  }
+
+  @Output() startEvent = new BehaviorSubject(false);
+
+  mesures!: number[];
+  degree$ = new BehaviorSubject<number>(0);
+  blink$ = new Subject<number>();
 }
