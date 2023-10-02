@@ -14,16 +14,20 @@ import {
 import { BpmComponent } from '../bpm/bpm.component';
 import { MesureComponent } from '../mesure/mesure.component';
 import { MetronomeComponent } from '../metronome/metronome.component';
+import { PlayComponent } from "../play/play.component";
 
 @Component({
-  selector: 'metronome-metronome-page',
-  standalone: true,
-  template: `
+    selector: 'metronome-metronome-page',
+    standalone: true,
+    template: `
+   <div class='top'> <metronome-play></metronome-play>
     <metronome-mesure
       [start]="start()"
       (emitMesure)="mesure$.next($event)"
     ></metronome-mesure
-    ><metronome-metronome
+    >
+  </div>
+   <metronome-metronome
       [mesure]="(mesure$ | async)!"
       [degree]="degree$ | async"
       [blink]="blink$ | async"
@@ -34,8 +38,8 @@ import { MetronomeComponent } from '../metronome/metronome.component';
       (emitBPM)="bpm$.next($event)"
     ></metronome-bpm>
   `,
-  styles: [
-    `
+    styles: [
+        `
       :host {
         height: 100%;
         flex: 1;
@@ -43,11 +47,16 @@ import { MetronomeComponent } from '../metronome/metronome.component';
         flex-direction: column;
         justify-content: space-around;
         align-items: center;
+        .top {
+          display: flex;
+          width: 80%;
+          justify-content: space-between;
+        }
       }
     `,
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MetronomeComponent, BpmComponent, MesureComponent],
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [CommonModule, MetronomeComponent, BpmComponent, MesureComponent, PlayComponent]
 })
 export class MetronomePageComponent {
   start = signal(false);

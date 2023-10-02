@@ -21,19 +21,7 @@ import { Observable } from 'rxjs';
       }}</mat-option>
     </mat-select>
   </mat-form-field>`,
-  styles: [
-    `
-      :host {
-        width: 100%;
-        display: flex;
-        justify-content: end;
-      }
-
-      .margin {
-        margin-right: 40px;
-      }
-    `,
-  ],
+ 
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MesureComponent {
