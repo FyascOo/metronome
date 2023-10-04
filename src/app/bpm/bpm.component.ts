@@ -25,17 +25,24 @@ import { Observable } from 'rxjs';
   template: `
     <button
       class="flex-1"
+      [class]="isStart() ? 'stop' : 'play'"
       mat-icon-button
       [disabled]="isStart()"
       (click)="update(-1)"
     >
       <mat-icon color="primary" fontIcon="remove"></mat-icon>
     </button>
-    <mat-slider discrete min="0" max="260" class="flex-2"
+    <mat-slider
+      discrete
+      min="0"
+      max="260"
+      class="flex-2"
+      [class]="isStart() ? 'stop' : 'play'"
       ><input matSliderThumb [formControl]="bpmFC"
     /></mat-slider>
     <button
       class="flex-1"
+      [class]="isStart() ? 'stop' : 'play'"
       mat-icon-button
       [disabled]="isStart()"
       (click)="update(1)"
@@ -55,6 +62,16 @@ import { Observable } from 'rxjs';
         }
         .flex-2 {
           flex: 2;
+        }
+
+        .stop {
+          opacity: 0 !important;
+          transition: all 1s;
+        }
+
+        .play {
+          opacity: 1;
+          transition: all 1s;
         }
       }
     `,

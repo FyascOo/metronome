@@ -9,7 +9,13 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { BehaviorSubject, Subject, delay, tap } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, delay, tap } from 'rxjs';
+
+export type Mesure = {
+  number: number;
+  color: 'black' | 'red' | 'green';
+  clicked: boolean;
+};
 
 @Component({
   selector: 'metronome-metronome',
@@ -21,7 +27,6 @@ import { BehaviorSubject, Subject, delay, tap } from 'rxjs';
     viewBox="0 0 200 200"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    (click)="startEvent.next(!startEvent.value)"
   >
     <g id="metronome">
       <rect width="200" height="200" fill="white" />
@@ -43,10 +48,11 @@ import { BehaviorSubject, Subject, delay, tap } from 'rxjs';
         #mesure
         id="mesure"
         x="101"
-        width="1"
+        width="3"
         height="25"
         rx="0.5"
         fill="black"
+        (click)="toggleMesure(nb)"
       />
     </g>
     <defs>
@@ -127,16 +133,24 @@ export class MetronomeComponent {
       barMesure.nativeElement.style.transform = `rotateZ(${degree}deg)`;
     });
 
-    this.blink$
+    combineLatest([this.blink$, this.clickedMesures$])
       .pipe(
         tap(
-          (blink) => (barMesures.get(blink)!.nativeElement.style.fill = 'red')
+          ([blink]) => (barMesures.get(blink)!.nativeElement.style.fill = 'red')
         ),
         delay(200)
       )
-      .subscribe(
-        (blink) => (barMesures.get(blink)!.nativeElement.style.fill = 'black')
+      .subscribe(([blink, clickedMesures]) =>
+        barMesures.forEach((_, i) =>
+          this._isClicked(clickedMesures, i, barMesures)
+        )
       );
+
+    this.clickedMesures$.subscribe((clickedMesures) => {
+      barMesures.forEach((_, i) =>
+        this._isClicked(clickedMesures, i, barMesures)
+      );
+    });
   }
 
   @Input() set mesure(mesure: number) {
@@ -154,10 +168,24 @@ export class MetronomeComponent {
       this.blink$.next(blink);
     }
   }
-
-  @Output() startEvent = new BehaviorSubject(false);
-
+  @Output() clickedMesures$ = new BehaviorSubject<number[]>([]);
   mesures!: number[];
   degree$ = new BehaviorSubject<number>(0);
   blink$ = new Subject<number>();
+
+  toggleMesure(mesure: number) {
+    this.clickedMesures$.next(
+      this.clickedMesures$.value.includes(mesure)
+        ? this.clickedMesures$.value.filter((v) => v !== mesure)
+        : [...this.clickedMesures$.value, mesure]
+    );
+  }
+
+  private _isClicked(clickedMesures: number[], i: number, barMesures: any) {
+    if (clickedMesures.includes(i)) {
+      barMesures.get(i)!.nativeElement.style.fill = 'green';
+    } else {
+      barMesures.get(i)!.nativeElement.style.fill = 'black';
+    }
+  }
 }

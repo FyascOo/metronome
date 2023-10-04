@@ -14,32 +14,34 @@ import {
 import { BpmComponent } from '../bpm/bpm.component';
 import { MesureComponent } from '../mesure/mesure.component';
 import { MetronomeComponent } from '../metronome/metronome.component';
-import { PlayComponent } from "../play/play.component";
+import { PlayComponent } from '../play/play.component';
 
 @Component({
-    selector: 'metronome-metronome-page',
-    standalone: true,
-    template: `
-   <div class='top'> <metronome-play></metronome-play>
-    <metronome-mesure
-      [start]="start()"
-      (emitMesure)="mesure$.next($event)"
-    ></metronome-mesure
-    >
-  </div>
-   <metronome-metronome
+  selector: 'metronome-metronome-page',
+  standalone: true,
+  template: `
+    <div class="top">
+      <metronome-mesure
+        [start]="start()"
+        (emitMesure)="mesure$.next($event)"
+      ></metronome-mesure>
+      <metronome-play
+        (play$)="$event ? initLoop() : stopLoop()"
+      ></metronome-play>
+    </div>
+    <metronome-metronome
       [mesure]="(mesure$ | async)!"
       [degree]="degree$ | async"
       [blink]="blink$ | async"
-      (startEvent)="$event ? initLoop() : stopLoop()"
+      (clickedMesures$)="clickedMesuresChanges($event)"
     ></metronome-metronome>
     <metronome-bpm
       [start]="start()"
       (emitBPM)="bpm$.next($event)"
     ></metronome-bpm>
   `,
-    styles: [
-        `
+  styles: [
+    `
       :host {
         height: 100%;
         flex: 1;
@@ -54,9 +56,15 @@ import { PlayComponent } from "../play/play.component";
         }
       }
     `,
-    ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, MetronomeComponent, BpmComponent, MesureComponent, PlayComponent]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    MetronomeComponent,
+    BpmComponent,
+    MesureComponent,
+    PlayComponent,
+  ],
 })
 export class MetronomePageComponent {
   start = signal(false);
@@ -66,9 +74,19 @@ export class MetronomePageComponent {
   emitBeep$ = new Subject<number>();
   stopLoop$ = new Subject();
   blink$ = new Subject<number>();
-  beep = new Howl({
+  bip = new Howl({
     src: ['../assets/son/bip.flac'],
   });
+
+  beep = new Howl({
+    src: ['../assets/son/beep.wav'],
+  });
+
+  clickedMesures: number[] = [];
+
+  clickedMesuresChanges($event: number[]) {
+    this.clickedMesures = [...$event];
+  }
 
   initLoop() {
     this.start.set(true);
@@ -82,7 +100,7 @@ export class MetronomePageComponent {
 
     combineLatest([this.bpm$, this.mesure$])
       .pipe(
-        tap(() => this.beep.play()),
+        tap(() => this.bip.play()),
         tap(() => this.blink$.next(0)),
         switchMap(([bpm, mesure]) =>
           interval((1000 * 60) / bpm).pipe(
@@ -93,7 +111,12 @@ export class MetronomePageComponent {
         takeUntil(this.stopLoop$)
       )
       .subscribe(({ interval, mesure }) => {
-        this.beep.play();
+        if (this.clickedMesures.includes((interval + 1) % mesure)) {
+          this.beep.play();
+        } else {
+          this.bip.play();
+        }
+
         this.blink$.next((interval + 1) % mesure);
       });
   }
